@@ -91,7 +91,7 @@
   .mcard p,.mcard li{font-size:13.5px;line-height:1.55;color:#33404f}
   .mcard .x{float:right;cursor:pointer;border:none;background:#f1f4f8;border-radius:8px;width:30px;height:30px;font-size:16px}
   .mcard a{color:var(--accent)}
-  .toggle,.mobile-only,.pfoot{display:none}
+  .toggle,.mobile-only,.pfoot,.phead{display:none}
   .fbadge{display:inline-block;min-width:16px;padding:0 5px;margin-left:5px;border-radius:999px;background:var(--accent);color:#fff;font-size:10.5px;line-height:16px;text-align:center}
   .fbadge:empty{display:none}
   /* bottom sheet used on phones instead of map popups */
@@ -111,9 +111,13 @@
   @media(max-width:820px){
     #app{height:100dvh;min-height:420px}
     header.topbar{padding:8px 10px;gap:6px;flex-wrap:nowrap}
-    header.topbar h1{font-size:14px;line-height:1.2}
+    header.topbar .ttl{min-width:0;overflow:hidden}
+    header.topbar h1{font-size:14px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     header.topbar .sub,.desk-only{display:none!important}
+    header.topbar .spacer{flex:1 1 0;min-width:0}
+    .seg,.toggle,#infoBtn{flex:none}
     .seg button{padding:7px 11px}
+    .phead{display:flex;align-items:center;gap:8px;position:sticky;top:-14px;z-index:5;background:#fff;margin:-14px -14px 12px;padding:10px 14px;border-bottom:1px solid var(--line);font-size:15px;color:var(--accent)}
     .btn{padding:7px 10px}
     .toggle{display:inline-block}
     .mobile-only{display:inline-block}
@@ -135,12 +139,18 @@
     td.det{padding:4px 12px 16px}
     .lhead{padding:8px 12px} .lhead .sortm{display:inline-block} .lhead .rpp{display:none}
   }
+  /* very narrow screens (Wix mobile ≈ 320px): drop the title so Map / List / Filters always fit */
+  @media(max-width:480px){
+    header.topbar .ttl{display:none}
+    header.topbar .spacer{display:none}
+    .seg{flex:1 1 auto} .seg button{flex:1}
+  }
 </style>
 </head>
 <body>
 <div id="app">
   <header class="topbar">
-    <div>
+    <div class="ttl">
       <h1>Transparency Register</h1>
       <div class="sub">AI-driven regulatory &amp; public-sector practices · EU and beyond</div>
     </div>
@@ -157,6 +167,7 @@
   </header>
   <div class="main">
     <aside class="panel" id="panel">
+      <div class="phead"><b>Filters</b><span style="flex:1"></span><button class="btn primary" id="closePanel">Close ×</button></div>
       <div class="count" id="count">Loading…</div>
       <h2>Search</h2>
       <div class="field"><input type="search" id="q" placeholder="Authority, name, place, keyword…"></div>
@@ -461,8 +472,13 @@ function init(){
   $("resetBtn").onclick = resetAll; $("resetBtn2").onclick = resetAll;
   $("vMap").onclick = ()=>setView("map"); $("vList").onclick = ()=>setView("list");
   $("csvBtn").onclick = downloadCSV; $("csvBtn2").onclick = downloadCSV;
-  $("toggleFilters").onclick = ()=>$("panel").classList.toggle("open");
-  $("applyBtn").onclick = ()=>$("panel").classList.remove("open");
+  // filters panel: Close button at the top, "Show N practices" at the bottom, and the phone's Back button
+  const panelOpen = ()=>$("panel").classList.contains("open");
+  const openPanel = ()=>{ if(panelOpen()) return; $("panel").classList.add("open"); $("panel").scrollTop = 0; try{ history.pushState({ui:"panel"},""); }catch(e){} };
+  const closePanel = ()=>{ if(!panelOpen()) return; $("panel").classList.remove("open"); try{ if(history.state && history.state.ui==="panel") history.back(); }catch(e){} };
+  window.addEventListener("popstate",()=>{ $("panel").classList.remove("open"); closeSheet(); });
+  $("toggleFilters").onclick = ()=> panelOpen() ? closePanel() : openPanel();
+  $("applyBtn").onclick = closePanel; $("closePanel").onclick = closePanel;
   $("sheetX").onclick = closeSheet; map.on("click", closeSheet);
   $("unlockBtn").onclick = ()=>setMapLock(false); $("lockBtn").onclick = ()=>setMapLock(true);
   if(COARSE && IN_FRAME) setMapLock(true);
