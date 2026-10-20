@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transparency Register — AI in regulation across the EU and beyond</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.min.css">
+<style>
+  :root{--bg:#fff;--ink:#1f2733;--muted:#5b6675;--line:#e4e8ee;--accent:#15466e;--accent2:#2e7d57;--chip:#f2f5f9;--astrid:#b8860b}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+  #app{display:flex;flex-direction:column;height:100%;min-height:560px}
+  header.topbar{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fbfcfe,#f4f7fb);flex-wrap:wrap}
+  header.topbar h1{font-size:16px;margin:0;font-weight:700;color:var(--accent)}
+  header.topbar .sub{font-size:12px;color:var(--muted);margin-top:1px}
+  .spacer{flex:1}
+  .btn{cursor:pointer;border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 10px;font-size:12.5px;color:var(--ink);text-decoration:none;display:inline-block}
+  .btn:hover{background:#f6f8fb}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .seg button{border:none;background:#fff;padding:6px 14px;font-size:12.5px;cursor:pointer;color:var(--ink)}
+  .seg button.on{background:var(--accent);color:#fff}
+  .main{flex:1;display:flex;min-height:0;position:relative}
+  aside.panel{width:288px;flex:none;border-right:1px solid var(--line);overflow:auto;padding:14px;background:#fff}
+  aside.panel h2{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:16px 0 7px}
+  aside.panel h2:first-child{margin-top:0}
+  .field{margin-bottom:10px}
+  .field label{display:block;font-size:11.5px;color:var(--muted);margin-bottom:4px}
+  select,input[type=search]{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#fff;color:var(--ink)}
+  .count{font-size:13px;background:var(--chip);border:1px solid var(--line);border-radius:8px;padding:9px 11px;line-height:1.35}
+  .count b{color:var(--accent)} .count .env{color:var(--accent2);font-weight:600}
+  #mapwrap{flex:1;position:relative;min-width:0} #map{position:absolute;inset:0}
+  #listwrap{flex:1;min-width:0;overflow:auto;display:none;background:#fbfcfd}
+  .leaflet-popup-content{margin:12px 14px;font-size:13px;line-height:1.45;max-height:360px;overflow:auto}
+  .card h3{margin:0 0 2px;font-size:14px;color:var(--accent)}
+  .card .auth{font-size:12.5px;color:var(--muted);margin-bottom:6px}
+  .row{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0}
+  .tag{font-size:11px;border-radius:999px;padding:2px 8px;border:1px solid var(--line);background:#f6f8fb;color:#33404f;white-space:nowrap}
+  .tag.cat{color:#fff;border:none} .tag.tech{background:#eef4fb;border-color:#d6e3f2;color:#1f4d7a}
+  .loc{font-size:12px;color:#3a4350;margin:6px 0}
+  .loc .prec{color:#7a838e}
+  .desc{margin:8px 0;color:#2a3340}
+  .envbox{border-left:3px solid var(--line);padding:6px 0 6px 10px;margin:8px 0;background:#fafbfc}
+  .envbox .lab{font-weight:700;font-size:12px}
+  .envbox.go{border-left-color:#2e7d57}.envbox.go .lab{color:#2e7d57}
+  .envbox.mid{border-left-color:#d97706}.envbox.mid .lab{color:#b45309}
+  .envbox.no{border-left-color:#c0c6cf}.envbox.no .lab{color:#6b7480}
+  .envbox .m{margin-top:4px;font-size:12px;color:#3a4350}
+  .srcs{margin-top:8px;font-size:12px}
+  .srcs .h{font-weight:700;color:#3a4350;margin-bottom:2px}
+  .srcs a{color:var(--accent);text-decoration:none;word-break:break-word}
+  .srcs a:hover{text-decoration:underline}
+  .srcs .note{color:#8a929c;font-size:11px;margin-top:3px}
+  .badge{font-size:10.5px;font-weight:700;border-radius:6px;padding:2px 7px;color:#fff;white-space:nowrap}
+  .badge.astrid{background:var(--astrid)} .badge.jrc{background:#15466e} .badge.new{background:#6b5bb5}
+  .dataset{display:flex;align-items:center;gap:6px;margin-top:9px;font-size:11.5px;color:var(--muted)}
+  .fix{font-size:11px;color:#8a929c;margin-top:6px} .fix a{color:#8a929c}
+  .dot{display:block;width:13px;height:13px;border-radius:50%;border:1.5px solid rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(40,50,65,.25)}
+  .dot.approx{opacity:.55}
+  .dot.astrid{width:16px;height:16px;border:2px solid #fff;box-shadow:0 0 0 1.5px var(--astrid),0 1px 4px rgba(0,0,0,.35)}
+  .legend{background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:11.5px;box-shadow:0 1px 6px rgba(20,40,70,.08);max-width:210px}
+  .legend .lt{font-weight:700;margin-bottom:6px;color:var(--accent);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+  .legend .li{display:flex;align-items:center;gap:7px;margin:3px 0;color:#39434f}
+  .legend .sw{width:11px;height:11px;border-radius:50%;flex:none;border:1px solid rgba(0,0,0,.15)}
+  .legend .li.star .sw{box-shadow:0 0 0 1.5px var(--astrid);background:#fff}
+  /* list view */
+  .lhead{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:2;flex-wrap:wrap}
+  .lhead .sp{flex:1}
+  .lhead select{width:auto}
+  table.reg{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff}
+  table.reg th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);padding:9px 10px;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap;background:#f7f9fb;position:sticky;top:49px}
+  table.reg th .ar{color:var(--accent)}
+  table.reg td{padding:9px 10px;border-bottom:1px solid #eef1f4;vertical-align:top}
+  table.reg tr.r{cursor:pointer} table.reg tr.r:hover td{background:#f7fafd}
+  table.reg tr.r.open td{background:#f2f7fc}
+  td .nm{font-weight:600;color:var(--accent)} td .au{color:var(--muted);font-size:12px}
+  td.det{background:#fbfdff;padding:4px 14px 14px}
+  .det .card{max-width:860px}
+  .envpill{font-size:11px;border-radius:999px;padding:2px 8px;white-space:nowrap}
+  .envpill.go{background:#e6f3ec;color:#256b48}.envpill.mid{background:#fdf1e2;color:#9a4f08}.envpill.no{background:#f1f3f5;color:#6b7480}
+  .pager{display:flex;align-items:center;gap:8px;justify-content:center;padding:14px;font-size:12.5px;color:var(--muted)}
+  .empty{padding:40px;text-align:center;color:var(--muted)}
+  /* modal */
+  .modal{position:absolute;inset:0;background:rgba(20,30,45,.45);display:none;align-items:center;justify-content:center;z-index:1200;padding:18px}
+  .modal.open{display:flex}
+  .mcard{background:#fff;max-width:680px;width:100%;border-radius:14px;padding:22px 24px;max-height:88%;overflow:auto;box-shadow:0 18px 50px rgba(10,25,50,.3)}
+  .mcard h2{margin:0 0 6px;color:var(--accent);font-size:18px}
+  .mcard p,.mcard li{font-size:13.5px;line-height:1.55;color:#33404f}
+  .mcard .x{float:right;cursor:pointer;border:none;background:#f1f4f8;border-radius:8px;width:30px;height:30px;font-size:16px}
+  .mcard a{color:var(--accent)}
+  .toggle{display:none}
+  @media(max-width:820px){
+    aside.panel{position:absolute;z-index:1000;max-height:80%;top:0;left:0;right:0;width:auto;border-right:none;border-bottom:1px solid var(--line);box-shadow:0 8px 24px rgba(20,40,70,.12);transform:translateY(-104%);transition:transform .25s}
+    aside.panel.open{transform:translateY(0)}
+    .toggle{display:inline-block}
+    table.reg .hm{display:none}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div>
+      <h1>Transparency Register</h1>
+      <div class="sub">AI-driven regulatory &amp; public-sector practices · EU and beyond</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="seg" role="tablist" aria-label="View">
+      <button id="vMap" class="on" role="tab">Map</button>
+      <button id="vList" role="tab">List</button>
+    </div>
+    <button class="btn toggle" id="toggleFilters">Filters</button>
+    <button class="btn" id="csvBtn" title="Download the practices currently shown as a CSV file (opens in Excel)">Download CSV</button>
+    <a class="btn" id="fullBtn" target="_blank" rel="noopener" style="display:none">Open full screen ↗</a>
+    <button class="btn" id="resetBtn">Reset</button>
+    <button class="btn primary" id="infoBtn">About</button>
+  </header>
+  <div class="main">
+    <aside class="panel" id="panel">
+      <div class="count" id="count">Loading…</div>
+      <h2>Search</h2>
+      <div class="field"><input type="search" id="q" placeholder="Authority, name, place, keyword…"></div>
+      <h2 id="colourH">Colour markers by</h2>
+      <div class="field" id="colourF"><select id="colourBy"><option value="category">Category of use</option><option value="env">Environmental impact</option></select></div>
+      <h2>Filters</h2>
+      <div class="field"><label for="f_category">Category of use (COFOG)</label><select id="f_category"></select></div>
+      <div class="field"><label for="f_level">Level of government</label><select id="f_level"></select></div>
+      <div class="field"><label for="f_techType">Type of technology</label><select id="f_techType"></select></div>
+      <div class="field"><label for="f_env">Environmental impact</label><select id="f_env"></select></div>
+      <div class="field"><label for="f_source">Source dataset</label><select id="f_source"></select></div>
+      <div class="field"><label for="f_country">Country</label><select id="f_country"></select></div>
+      <div class="field"><label for="f_status">Status</label><select id="f_status"></select></div>
+      <div class="field"><label for="f_geo">Location precision</label><select id="f_geo"></select></div>
+    </aside>
+    <div id="mapwrap"><div id="map"></div></div>
+    <div id="listwrap">
+      <div class="lhead">
+        <span id="lcount"></span><span class="sp"></span>
+        <label style="font-size:12px;color:var(--muted)">Rows per page
+          <select id="pageSize"><option>25</option><option selected>50</option><option>100</option></select></label>
+      </div>
+      <table class="reg">
+        <thead><tr>
+          <th data-k="name">Practice / authority</th>
+          <th data-k="country">Country · place</th>
+          <th data-k="level" class="hm">Level</th>
+          <th data-k="category" class="hm">Category</th>
+          <th data-k="techType" class="hm">Technology</th>
+          <th data-k="env">Env. impact</th>
+          <th data-k="sourceShort">Source</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="pager" id="pager"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="mcard">
+    <button class="x" id="closeModal" aria-label="Close">×</button>
+    <h2>About the Transparency Register</h2>
+    <p>The Transparency Register is an interactive map of regulatory and public-sector practices that leverage Artificial Intelligence across the EU and beyond. Each practice is described by the <b>responsible authority</b>, a <b>short description</b>, the <b>type of technology</b>, the <b>level of government</b>, the <b>category of use</b>, and whether its <b>environmental impact</b> has been considered (and with which methodology). It can be browsed as a <b>map</b> or as a <b>list</b>, and the current selection can be downloaded as CSV. The initiative aims to enhance regulatory transparency, encourage best-practice sharing and foster innovation in AI-driven governance.</p>
+    <p style="margin-top:14px"><b>Where the cases come from — two datasets:</b></p>
+    <ul>
+      <li><span class="badge jrc">JRC</span> <b>JRC Public Sector Tech Watch (PSTW)</b> — the European Commission's observatory of AI and emerging technologies in the public sector (<a href="https://joinup.ec.europa.eu/collection/public-sector-tech-watch" target="_blank" rel="noopener">Joinup collection</a>). Provides the EU-wide breadth of the Register; source links are those recorded in the JRC dataset.</li>
+      <li><span class="badge astrid">Astrid</span> <b>Astrid–SUSTAIN-AI-REG joint research</b> — G. Fantoni &amp; M. Rallo, “Intelligenza artificiale nel settore pubblico: il punto di vista delle amministrazioni italiane, tra sovranità digitale e sostenibilità ambientale”, <i>BioLaw Journal – Rivista di BioDiritto</i>, 2/2026, pp. 345–376, <a href="https://doi.org/10.15168/2284-4503-4218" target="_blank" rel="noopener">doi:10.15168/2284-4503-4218</a>. Provides the in-depth Italian cases, including the <b>environmental-impact methodologies</b>.</li>
+    </ul>
+    <p style="margin-top:12px"><b>Location.</b> Practices are placed at the city of the responsible authority when it can be identified, otherwise at its region; national bodies are shown at the capital, EU-level bodies and multi-country projects at their seat or in Brussels. Cases whose location could only be determined at country level are shown at the capital with a lighter marker and flagged as “approximate”.</p>
+    <p style="font-size:12.5px;color:#6b7480">Methodological note: the JRC dataset does not record an environmental-impact assessment, so those cases are shown as <i>“Not documented”</i>. This is itself a finding — at present only a handful of authorities document the environmental footprint of their AI. The Register is updated regularly; corrections can be sent to <a href="mailto:sustainai@lumsa.it">sustainai@lumsa.it</a>.</p>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
+<script>
+const CONTACT = "sustainai@lumsa.it";
+const REFS = {
+  JRC:    {label:"JRC Public Sector Tech Watch", url:"https://joinup.ec.europa.eu/collection/public-sector-tech-watch"},
+  ASTRID: {label:"Fantoni & Rallo, BioLaw Journal 2/2026 — read the study", url:"https://doi.org/10.15168/2284-4503-4218"}
+};
+const GEO = {c:"City", r:"Region", n:"National body / national scope — shown at the capital", e:"EU-level body or multi-country project", a:"Approximate — only the country is known"};
+const GEO_SHORT = {c:"City", r:"Region", n:"National (capital)", e:"EU level", a:"Approximate (country)"};
+const CAT_COLORS = {"General public services":"#4e79a7","Economic affairs":"#f28e2b","Public order and safety":"#e15759","Health":"#76b7b2",
+  "Social protection":"#edc948","Environmental protection":"#59a14f","Education":"#b07aa1","Housing and community amenities":"#9c755f",
+  "Recreation, culture and religion":"#ff9da7","Defence":"#8c8c8c","Other / unspecified":"#bab0ac"};
+const ENV_COLORS = {go:"#2e7d57",mid:"#d97706",no:"#c0c6cf"};
+function envBucket(e){ if(!e||e==="Not documented")return "no"; if(e.indexOf("Partially")===0||e.indexOf("Aware")===0)return "mid"; return "go"; }
+const ENV_NAME = {go:"Considered",mid:"Partly / aware",no:"Not documented"};
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function domain(u){ try{ return new URL(u).hostname.replace(/^www\./,""); }catch(e){ return u; } }
+function linksOf(d){ return (d.links && d.links.length) ? d.links : (d.link ? [d.link] : []); }
+function badgeClass(d){ return d.sourceShort==="Astrid" ? "astrid" : (d.sourceShort==="JRC" ? "jrc" : "new"); }
+
+let DATA = (window.REGISTER_DATA && window.REGISTER_DATA.length) ? window.REGISTER_DATA : null;
+let FILTERED = [], colourBy = "category", view = "map", sortKey = "", sortDir = 1, page = 0, openId = null;
+const markerById = {};
+
+const map = L.map("map",{worldCopyJump:true,minZoom:2}).setView([50,12],4);
+L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",{attribution:"&copy; OpenStreetMap &copy; CARTO",subdomains:"abcd",maxZoom:19}).addTo(map);
+const cluster = L.markerClusterGroup({chunkedLoading:true,spiderfyOnMaxZoom:true,maxClusterRadius:46,showCoverageOnHover:false});
+map.addLayer(cluster);
+
+const $ = id => document.getElementById(id);
+const F = ["category","level","techType","env","source","country","status","geo"];
+const els = {q:$("q"),count:$("count"),colourBy:$("colourBy")}; F.forEach(k=>els[k]=$("f_"+k));
+
+function card(d){
+  const c = CAT_COLORS[d.category]||"#888", eb = envBucket(d.env), L1 = linksOf(d);
+  let h = `<div class="card"><h3>${esc(d.name)}</h3>`;
+  if(d.authority) h += `<div class="auth">${esc(d.authority)}</div>`;
+  h += `<div class="row"><span class="tag cat" style="background:${c}">${esc(d.category)}</span><span class="tag">${esc(d.level)}</span><span class="tag tech">${esc(d.techType)}</span>`;
+  if(d.status) h += `<span class="tag">${esc(d.status)}${d.year?" · "+esc(d.year):""}</span>`;
+  h += `</div>`;
+  h += `<div class="loc">Location: <b>${esc(d.place||d.country)}</b>${d.place&&d.place.indexOf(d.country)<0?", "+esc(d.country):""} <span class="prec">· ${esc(GEO[d.geo]||"")}</span></div>`;
+  if(d.desc) h += `<div class="desc">${esc(d.desc)}</div>`;
+  h += `<div class="envbox ${eb}"><span class="lab">Environmental impact: ${esc(d.env)}</span>`;
+  h += d.envMethod ? `<div class="m">${esc(d.envMethod)}</div>` : (eb==="no" ? `<div class="m" style="color:#8a929c">No environmental-impact methodology recorded for this case.</div>` : "");
+  h += `</div>`;
+  h += `<div class="srcs">`;
+  if(L1.length){
+    h += `<div class="h">${d.sourceShort==="JRC" ? "Links recorded in the JRC dataset" : "Official / project links"}</div>`;
+    h += L1.map(u=>`<div>↗ <a href="${esc(u)}" target="_blank" rel="noopener">${esc(domain(u))}</a></div>`).join("");
+  }
+  const ref = REFS[d.ref];
+  if(ref) h += `<div style="margin-top:4px">↗ <a href="${esc(ref.url)}" target="_blank" rel="noopener">${esc(ref.label)}</a></div>`;
+  if(!L1.length && !ref) h += `<div class="note">No source link available.</div>`;
+  h += `</div>`;
+  h += `<div class="dataset"><span class="badge ${badgeClass(d)}">${esc(d.sourceShort)}</span><span>${esc(d.source)}</span></div>`;
+  const subj = encodeURIComponent(`Transparency Register – correction ${d.id}`);
+  h += `<div class="fix">${esc(d.id)} · <a href="mailto:${CONTACT}?subject=${subj}">Report a correction</a></div>`;
+  return h + `</div>`;
+}
+
+function markerColor(d){ return colourBy==="env" ? ENV_COLORS[envBucket(d.env)] : (CAT_COLORS[d.category]||"#bab0ac"); }
+function icon(d){
+  const cls = "dot" + (d.sourceShort==="Astrid" ? " astrid" : "") + (d.geo==="a" ? " approx" : "");
+  return L.divIcon({className:"",html:`<span class="${cls}" style="background:${markerColor(d)}"></span>`,iconSize:[16,16],iconAnchor:[8,8]});
+}
+
+function matches(d,f,q){
+  if(f.category && d.category!==f.category) return false;
+  if(f.level && d.level!==f.level) return false;
+  if(f.techType && d.techType!==f.techType) return false;
+  if(f.env){ if(f.env==="__considered"){ if(envBucket(d.env)==="no") return false; } else if(d.env!==f.env) return false; }
+  if(f.source && d.sourceShort!==f.source) return false;
+  if(f.country && d.country!==f.country) return false;
+  if(f.status && d.status!==f.status) return false;
+  if(f.geo){ if(f.geo==="__precise"){ if(d.geo!=="c"&&d.geo!=="r") return false; } else if(d.geo!==f.geo) return false; }
+  if(q){ const hay=(d.name+" "+d.authority+" "+(d.keywords||"")+" "+(d.desc||"")+" "+d.techType+" "+(d.place||"")+" "+d.country+" "+d.id).toLowerCase(); if(hay.indexOf(q)<0) return false; }
+  return true;
+}
+
+function apply(){
+  const q = (els.q.value||"").toLowerCase().trim(), f = {};
+  F.forEach(k=>f[k]=els[k].value);
+  FILTERED = DATA.filter(d=>matches(d,f,q));
+  const envN = FILTERED.filter(d=>envBucket(d.env)!=="no").length;
+  els.count.innerHTML = `Showing <b>${FILTERED.length.toLocaleString("en")}</b> of ${DATA.length.toLocaleString("en")} practices` + (envN?` · <span class="env">${envN} document environmental impact</span>`:"");
+  page = 0; renderMap(); renderList();
+}
+
+function renderMap(){
+  cluster.clearLayers(); for(const k in markerById) delete markerById[k];
+  const ms = FILTERED.map(d=>{ const m=L.marker([d.lat,d.lng],{icon:icon(d)}); m.bindPopup(()=>card(d),{maxWidth:360,minWidth:270}); markerById[d.id]=m; return m; });
+  cluster.addLayers(ms); buildLegend();
+}
+
+function sorted(){
+  if(!sortKey) return FILTERED;
+  const k = sortKey;
+  return FILTERED.slice().sort((a,b)=>{ const x=(k==="env"?envBucket(a.env):a[k]||"").toString(), y=(k==="env"?envBucket(b.env):b[k]||"").toString(); return x.localeCompare(y)*sortDir; });
+}
+
+function renderList(){
+  const size = parseInt($("pageSize").value,10), rows = sorted(), pages = Math.max(1,Math.ceil(rows.length/size));
+  if(page>=pages) page = pages-1;
+  const slice = rows.slice(page*size, page*size+size);
+  $("lcount").innerHTML = `<b style="color:var(--accent)">${rows.length.toLocaleString("en")}</b> practices · click a row for details`;
+  let h = "";
+  if(!slice.length) h = `<tr><td colspan="7" class="empty">No practice matches the current filters.</td></tr>`;
+  for(const d of slice){
+    const eb = envBucket(d.env), open = openId===d.id;
+    h += `<tr class="r${open?" open":""}" data-id="${esc(d.id)}">
+      <td><div class="nm">${esc(d.name)}</div><div class="au">${esc(d.authority)}</div></td>
+      <td>${esc(d.country)}<div class="au">${esc(d.place&&d.place!==d.country?d.place:"")}${d.geo==="a"?" (approx.)":""}</div></td>
+      <td class="hm">${esc(d.level)}</td>
+      <td class="hm"><span class="tag cat" style="background:${CAT_COLORS[d.category]||"#888"}">${esc(d.category)}</span></td>
+      <td class="hm">${esc(d.techType)}</td>
+      <td><span class="envpill ${eb}">${ENV_NAME[eb]}</span></td>
+      <td><span class="badge ${badgeClass(d)}">${esc(d.sourceShort)}</span></td></tr>`;
+    if(open) h += `<tr><td class="det" colspan="7">${card(d)}<div style="margin-top:8px"><button class="btn" data-show="${esc(d.id)}">Show on map</button></div></td></tr>`;
+  }
+  $("tbody").innerHTML = h;
+  document.querySelectorAll("table.reg th").forEach(th=>{ const k=th.dataset.k; th.innerHTML = th.textContent.replace(/ [▲▼]$/,"") + (k===sortKey?` <span class="ar">${sortDir>0?"▲":"▼"}</span>`:""); });
+  $("pager").innerHTML = rows.length>size ? `<button class="btn" id="pPrev" ${page===0?"disabled":""}>‹ Previous</button> Page ${page+1} of ${pages} <button class="btn" id="pNext" ${page>=pages-1?"disabled":""}>Next ›</button>` : "";
+  if($("pPrev")) $("pPrev").onclick = ()=>{ page--; renderList(); $("listwrap").scrollTop=0; };
+  if($("pNext")) $("pNext").onclick = ()=>{ page++; renderList(); $("listwrap").scrollTop=0; };
+}
+
+$("tbody").addEventListener("click", e=>{
+  const show = e.target.closest("[data-show]");
+  if(show){ showOnMap(show.dataset.show); return; }
+  if(e.target.closest("a")) return;
+  const tr = e.target.closest("tr.r"); if(!tr) return;
+  openId = (openId===tr.dataset.id) ? null : tr.dataset.id; renderList();
+});
+document.querySelectorAll("table.reg th").forEach(th=>th.addEventListener("click",()=>{
+  const k = th.dataset.k; if(sortKey===k) sortDir=-sortDir; else { sortKey=k; sortDir=1; } page=0; renderList();
+}));
+$("pageSize").addEventListener("change",()=>{ page=0; renderList(); });
+
+function setView(v){
+  view = v; $("vMap").classList.toggle("on",v==="map"); $("vList").classList.toggle("on",v==="list");
+  $("mapwrap").style.display = v==="map" ? "" : "none"; $("listwrap").style.display = v==="list" ? "block" : "none";
+  $("colourH").style.display = $("colourF").style.display = v==="map" ? "" : "none";
+  if(v==="map") setTimeout(()=>map.invalidateSize(),60);
+  try{ history.replaceState(null,"",v==="list"?"#list":"#map"); }catch(e){}
+}
+function showOnMap(id){
+  setView("map"); const m = markerById[id]; if(!m) return;
+  setTimeout(()=>cluster.zoomToShowLayer(m,()=>m.openPopup()),120);
+}
+
+let legendCtl;
+function buildLegend(){
+  if(legendCtl) legendCtl.remove();
+  legendCtl = L.control({position:"bottomright"});
+  legendCtl.onAdd = function(){
+    const div = L.DomUtil.create("div","legend");
+    let items;
+    if(colourBy==="env"){
+      items = `<div class="lt">Environmental impact</div>` + ["go","mid","no"].map(k=>`<div class="li"><span class="sw" style="background:${ENV_COLORS[k]}"></span>${ENV_NAME[k]}</div>`).join("");
+    } else {
+      items = `<div class="lt">Category of use</div>` + Object.keys(CAT_COLORS).filter(k=>k!=="Defence").map(k=>`<div class="li"><span class="sw" style="background:${CAT_COLORS[k]}"></span>${k}</div>`).join("");
+    }
+    div.innerHTML = items + `<div class="li star"><span class="sw"></span>Astrid case (Italy)</div><div class="li"><span class="sw" style="background:#9aa3ad;opacity:.5"></span>Approximate location</div>`;
+    return div;
+  };
+  legendCtl.addTo(map);
+}
+
+function csvCell(v){ v = String(v==null?"":v); return /[",\n;]/.test(v) ? `"${v.replace(/"/g,'""')}"` : v; }
+function downloadCSV(){
+  const cols = [["id","ID"],["name","Practice"],["authority","Responsible authority"],["country","Country"],["place","Place"],["geo","Location precision"],
+    ["level","Level of government"],["category","Category of use (COFOG)"],["techType","Type of technology"],["status","Status"],["year","Start year"],
+    ["desc","Short description"],["env","Environmental impact"],["envMethod","Environmental-impact methodology"],["source","Source dataset"],["links","Links"],["ref","Reference"]];
+  const lines = [cols.map(c=>csvCell(c[1])).join(",")];
+  for(const d of sorted()){
+    lines.push(cols.map(([k])=>{
+      if(k==="geo") return csvCell(GEO_SHORT[d.geo]||"");
+      if(k==="links") return csvCell(linksOf(d).join(" | "));
+      if(k==="ref") return csvCell(REFS[d.ref] ? REFS[d.ref].url : "");
+      return csvCell(d[k]);
+    }).join(","));
+  }
+  const blob = new Blob(["﻿"+lines.join("\r\n")],{type:"text/csv;charset=utf-8"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "transparency-register.csv";
+  document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500);
+}
+
+function uniq(k){ return [...new Set(DATA.map(d=>d[k]).filter(Boolean))].sort((a,b)=>a.localeCompare(b)); }
+function fill(sel,vals,all){ sel.innerHTML = `<option value="">${all}</option>` + vals.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join(""); }
+
+function init(){
+  fill(els.category,uniq("category"),"All categories");
+  fill(els.level,uniq("level"),"All levels");
+  fill(els.techType,uniq("techType"),"All technologies");
+  els.env.innerHTML = `<option value="">All</option><option value="__considered">— Any environmental impact considered —</option>` + uniq("env").map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join("");
+  const srcs = uniq("sourceShort");
+  els.source.innerHTML = `<option value="">All datasets</option>` + srcs.map(s=>`<option value="${esc(s)}">${s==="JRC"?"JRC Public Sector Tech Watch":(s==="Astrid"?"Astrid–SUSTAIN-AI-REG (Italy)":esc(s))}</option>`).join("");
+  fill(els.country,uniq("country"),"All countries");
+  fill(els.status,uniq("status"),"All statuses");
+  els.geo.innerHTML = `<option value="">All</option><option value="__precise">City or region only</option>` + ["c","r","n","e","a"].map(k=>`<option value="${k}">${GEO_SHORT[k]}</option>`).join("");
+  let qT; els.q.addEventListener("input",()=>{ clearTimeout(qT); qT=setTimeout(apply,180); });
+  F.forEach(k=>els[k].addEventListener("change",apply));
+  els.colourBy.addEventListener("change",e=>{ colourBy=e.target.value; renderMap(); });
+  $("resetBtn").onclick = ()=>{ F.forEach(k=>els[k].value=""); els.q.value=""; colourBy="category"; els.colourBy.value="category"; sortKey=""; openId=null; apply(); map.setView([50,12],4); };
+  $("vMap").onclick = ()=>setView("map"); $("vList").onclick = ()=>setView("list");
+  $("csvBtn").onclick = downloadCSV;
+  $("toggleFilters").onclick = ()=>$("panel").classList.toggle("open");
+  $("infoBtn").onclick = ()=>$("modal").classList.add("open");
+  $("closeModal").onclick = ()=>$("modal").classList.remove("open");
+  $("modal").addEventListener("click",e=>{ if(e.target.id==="modal") e.target.classList.remove("open"); });
+  try{ if(window.self!==window.top && /^https?:/.test(location.href)){ const b=$("fullBtn"); b.href=location.href.split("#")[0]; b.style.display=""; } }catch(e){}
+  apply();
+  setView(location.hash==="#list" ? "list" : "map");
+}
+
+if(DATA) init();
+else fetch("register_data.json").then(r=>r.json()).then(j=>{ DATA=j; init(); })
+  .catch(()=>{ els.count.innerHTML = "<b>Could not load data.</b><br>Make sure register_data.json sits next to this page."; });
+</script>
+</body>
+</html>
