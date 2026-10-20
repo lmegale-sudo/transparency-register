@@ -91,12 +91,49 @@
   .mcard p,.mcard li{font-size:13.5px;line-height:1.55;color:#33404f}
   .mcard .x{float:right;cursor:pointer;border:none;background:#f1f4f8;border-radius:8px;width:30px;height:30px;font-size:16px}
   .mcard a{color:var(--accent)}
-  .toggle{display:none}
+  .toggle,.mobile-only,.pfoot{display:none}
+  .fbadge{display:inline-block;min-width:16px;padding:0 5px;margin-left:5px;border-radius:999px;background:var(--accent);color:#fff;font-size:10.5px;line-height:16px;text-align:center}
+  .fbadge:empty{display:none}
+  /* bottom sheet used on phones instead of map popups */
+  #sheet{position:fixed;left:0;right:0;bottom:0;z-index:1400;background:#fff;border-radius:16px 16px 0 0;box-shadow:0 -10px 30px rgba(10,25,50,.22);max-height:72%;overflow:auto;padding:8px 16px 20px;transform:translateY(105%);transition:transform .25s;font-size:13px;line-height:1.45}
+  #sheet.open{transform:translateY(0)}
+  #sheet .grab{width:42px;height:5px;border-radius:3px;background:#d5dae1;margin:2px auto 10px}
+  #sheet .x{position:absolute;right:10px;top:8px;border:none;background:#f1f4f8;border-radius:8px;width:32px;height:32px;font-size:17px;cursor:pointer}
+  #sheet .card h3{padding-right:36px}
+  /* touch lock: lets the Wix page scroll past the map until the user taps */
+  #tapOverlay{position:absolute;inset:0;z-index:900;display:none;align-items:flex-start;justify-content:center;padding-top:12px;pointer-events:none;background:linear-gradient(0deg,rgba(255,255,255,0) 70%,rgba(255,255,255,.55))}
+  #tapOverlay .pill{pointer-events:auto;cursor:pointer;background:rgba(21,70,110,.94);color:#fff;border:none;border-radius:999px;padding:10px 16px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.22)}
+  #lockBtn{position:absolute;top:10px;right:10px;z-index:950;display:none;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+  .legend.collapsible .lt{cursor:pointer}
+  .legend.collapsed .li{display:none}
+  .legend.collapsed .lt{margin-bottom:0}
+  .lhead .sortm{display:none;font-size:12px;color:var(--muted)}
   @media(max-width:820px){
-    aside.panel{position:absolute;z-index:1000;max-height:80%;top:0;left:0;right:0;width:auto;border-right:none;border-bottom:1px solid var(--line);box-shadow:0 8px 24px rgba(20,40,70,.12);transform:translateY(-104%);transition:transform .25s}
-    aside.panel.open{transform:translateY(0)}
+    #app{height:100dvh;min-height:420px}
+    header.topbar{padding:8px 10px;gap:6px;flex-wrap:nowrap}
+    header.topbar h1{font-size:14px;line-height:1.2}
+    header.topbar .sub,.desk-only{display:none!important}
+    .seg button{padding:7px 11px}
+    .btn{padding:7px 10px}
     .toggle{display:inline-block}
-    table.reg .hm{display:none}
+    .mobile-only{display:inline-block}
+    select,input[type=search]{font-size:16px}
+    aside.panel{position:fixed;z-index:1300;inset:0;width:auto;border:none;padding:14px 14px 96px;transform:translateY(102%);transition:transform .25s}
+    aside.panel.open{transform:translateY(0)}
+    .pfoot{position:fixed;left:0;right:0;bottom:0;display:flex;gap:8px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--line)}
+    .pfoot .primary{flex:1}
+    .leaflet-control-zoom{display:none}
+    .legend{max-width:170px;font-size:11px;padding:7px 9px}
+    table.reg thead{display:none}
+    table.reg,table.reg tbody,table.reg tr,table.reg td{display:block;width:100%}
+    table.reg tr.r{padding:11px 14px;border-bottom:1px solid #eef1f4;background:#fff}
+    table.reg tr.r td{border:none;padding:0}
+    table.reg tr.r td:nth-child(2){display:inline-block;width:auto;margin:6px 8px 0 0;font-size:12px}
+    table.reg tr.r td:nth-child(2) .au{display:inline;margin-left:4px}
+    table.reg tr.r td:nth-child(6),table.reg tr.r td:nth-child(7){display:inline-block;width:auto;margin:6px 6px 0 0}
+    table.reg .hm{display:none!important}
+    td.det{padding:4px 12px 16px}
+    .lhead{padding:8px 12px} .lhead .sortm{display:inline-block} .lhead .rpp{display:none}
   }
 </style>
 </head>
@@ -112,11 +149,11 @@
       <button id="vMap" class="on" role="tab">Map</button>
       <button id="vList" role="tab">List</button>
     </div>
-    <button class="btn toggle" id="toggleFilters">Filters</button>
-    <button class="btn" id="csvBtn" title="Download the practices currently shown as a CSV file (opens in Excel)">Download CSV</button>
-    <a class="btn" id="fullBtn" target="_blank" rel="noopener" style="display:none">Open full screen ↗</a>
-    <button class="btn" id="resetBtn">Reset</button>
-    <button class="btn primary" id="infoBtn">About</button>
+    <button class="btn toggle" id="toggleFilters">Filters<span class="fbadge" id="fbadge"></span></button>
+    <button class="btn desk-only" id="csvBtn" title="Download the practices currently shown as a CSV file (opens in Excel)">Download CSV</button>
+    <a class="btn desk-only" id="fullBtn" target="_blank" rel="noopener" style="display:none">Open full screen ↗</a>
+    <button class="btn desk-only" id="resetBtn">Reset</button>
+    <button class="btn primary" id="infoBtn" aria-label="About"><span class="desk-only">About</span><span class="mobile-only">i</span></button>
   </header>
   <div class="main">
     <aside class="panel" id="panel">
@@ -134,12 +171,18 @@
       <div class="field"><label for="f_country">Country</label><select id="f_country"></select></div>
       <div class="field"><label for="f_status">Status</label><select id="f_status"></select></div>
       <div class="field"><label for="f_geo">Location precision</label><select id="f_geo"></select></div>
+      <div class="field mobile-only" id="fullWrap2" style="display:none"><a class="btn" id="fullBtn2" target="_blank" rel="noopener">Open full screen ↗</a></div>
+      <div class="pfoot"><button class="btn primary" id="applyBtn">Show results</button><button class="btn" id="resetBtn2">Reset</button><button class="btn" id="csvBtn2">CSV</button></div>
     </aside>
-    <div id="mapwrap"><div id="map"></div></div>
+    <div id="mapwrap"><div id="map"></div>
+      <div id="tapOverlay"><button class="pill" id="unlockBtn">Tap here to move &amp; zoom the map</button></div>
+      <button class="btn" id="lockBtn">Done — lock map</button>
+    </div>
     <div id="listwrap">
       <div class="lhead">
         <span id="lcount"></span><span class="sp"></span>
-        <label style="font-size:12px;color:var(--muted)">Rows per page
+        <label class="sortm">Sort <select id="sortSel"><option value="">Default</option><option value="name">Practice</option><option value="country">Country</option><option value="level">Level</option><option value="env">Env. impact</option><option value="sourceShort">Source</option></select></label>
+        <label class="rpp" style="font-size:12px;color:var(--muted)">Rows per page
           <select id="pageSize"><option>25</option><option selected>50</option><option>100</option></select></label>
       </div>
       <table class="reg">
@@ -174,6 +217,8 @@
   </div>
 </div>
 
+<div id="sheet" aria-live="polite"><div class="grab"></div><button class="x" id="sheetX" aria-label="Close">×</button><div id="sheetBody"></div></div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
 <script>
@@ -198,6 +243,11 @@ function badgeClass(d){ return d.sourceShort==="Astrid" ? "astrid" : (d.sourceSh
 let DATA = (window.REGISTER_DATA && window.REGISTER_DATA.length) ? window.REGISTER_DATA : null;
 let FILTERED = [], colourBy = "category", view = "map", sortKey = "", sortDir = 1, page = 0, openId = null;
 const markerById = {};
+const MQ = window.matchMedia("(max-width: 820px)");
+const isMobile = () => MQ.matches;
+const COARSE = window.matchMedia("(pointer: coarse)").matches;
+let IN_FRAME = false; try{ IN_FRAME = window.self !== window.top; }catch(e){ IN_FRAME = true; }
+let legendOpen = false;
 
 const map = L.map("map",{worldCopyJump:true,minZoom:2}).setView([50,12],4);
 // Basemap: OpenStreetMap (no API key). If its tiles fail repeatedly, fall back to Esri Light Gray.
@@ -264,13 +314,36 @@ function apply(){
   FILTERED = DATA.filter(d=>matches(d,f,q));
   const envN = FILTERED.filter(d=>envBucket(d.env)!=="no").length;
   els.count.innerHTML = `Showing <b>${FILTERED.length.toLocaleString("en")}</b> of ${DATA.length.toLocaleString("en")} practices` + (envN?` · <span class="env">${envN} document environmental impact</span>`:"");
-  page = 0; renderMap(); renderList();
+  const active = F.filter(k=>els[k].value).length + (q?1:0);
+  $("fbadge").textContent = active ? active : "";
+  $("applyBtn").textContent = `Show ${FILTERED.length.toLocaleString("en")} practices`;
+  page = 0; closeSheet(); renderMap(); renderList();
 }
 
 function renderMap(){
   cluster.clearLayers(); for(const k in markerById) delete markerById[k];
-  const ms = FILTERED.map(d=>{ const m=L.marker([d.lat,d.lng],{icon:icon(d)}); m.bindPopup(()=>card(d),{maxWidth:360,minWidth:270}); markerById[d.id]=m; return m; });
+  const ms = FILTERED.map(d=>{ const m=L.marker([d.lat,d.lng],{icon:icon(d)}); m.on("click",()=>openDetail(d,m)); markerById[d.id]={m,d}; return m; });
   cluster.addLayers(ms); buildLegend();
+}
+
+// desktop: popup on the map · phone: bottom sheet (easier to read and close)
+function openDetail(d,m){
+  if(isMobile()){
+    $("sheetBody").innerHTML = card(d); $("sheet").classList.add("open"); $("sheet").scrollTop = 0;
+    const p = map.latLngToContainerPoint(m.getLatLng()), h = map.getSize().y;
+    if(p.y > h*0.35) map.panBy([0, p.y - h*0.28]);
+    return;
+  }
+  L.popup({maxWidth:360,minWidth:270,offset:[0,-2]}).setLatLng(m.getLatLng()).setContent(card(d)).openOn(map);
+}
+function closeSheet(){ $("sheet").classList.remove("open"); }
+
+// on touch screens inside Wix the map starts "locked" so the page can still be scrolled
+function setMapLock(locked){
+  const fn = locked ? "disable" : "enable";
+  map.dragging[fn](); map.touchZoom[fn](); map.doubleClickZoom[fn]();
+  $("tapOverlay").style.display = locked ? "flex" : "none";
+  $("lockBtn").style.display = (!locked && COARSE && IN_FRAME) ? "inline-block" : "none";
 }
 
 function sorted(){
@@ -313,9 +386,10 @@ $("tbody").addEventListener("click", e=>{
   openId = (openId===tr.dataset.id) ? null : tr.dataset.id; renderList();
 });
 document.querySelectorAll("table.reg th").forEach(th=>th.addEventListener("click",()=>{
-  const k = th.dataset.k; if(sortKey===k) sortDir=-sortDir; else { sortKey=k; sortDir=1; } page=0; renderList();
+  const k = th.dataset.k; if(sortKey===k) sortDir=-sortDir; else { sortKey=k; sortDir=1; } $("sortSel").value = k; page=0; renderList();
 }));
 $("pageSize").addEventListener("change",()=>{ page=0; renderList(); });
+$("sortSel").addEventListener("change",e=>{ sortKey=e.target.value; sortDir=1; page=0; renderList(); });
 
 function setView(v){
   view = v; $("vMap").classList.toggle("on",v==="map"); $("vList").classList.toggle("on",v==="list");
@@ -325,8 +399,8 @@ function setView(v){
   try{ history.replaceState(null,"",v==="list"?"#list":"#map"); }catch(e){}
 }
 function showOnMap(id){
-  setView("map"); const m = markerById[id]; if(!m) return;
-  setTimeout(()=>cluster.zoomToShowLayer(m,()=>m.openPopup()),120);
+  setView("map"); const o = markerById[id]; if(!o) return;
+  setTimeout(()=>cluster.zoomToShowLayer(o.m,()=>openDetail(o.d,o.m)),120);
 }
 
 let legendCtl;
@@ -334,14 +408,15 @@ function buildLegend(){
   if(legendCtl) legendCtl.remove();
   legendCtl = L.control({position:"bottomright"});
   legendCtl.onAdd = function(){
-    const div = L.DomUtil.create("div","legend");
-    let items;
-    if(colourBy==="env"){
-      items = `<div class="lt">Environmental impact</div>` + ["go","mid","no"].map(k=>`<div class="li"><span class="sw" style="background:${ENV_COLORS[k]}"></span>${ENV_NAME[k]}</div>`).join("");
-    } else {
-      items = `<div class="lt">Category of use</div>` + Object.keys(CAT_COLORS).filter(k=>k!=="Defence").map(k=>`<div class="li"><span class="sw" style="background:${CAT_COLORS[k]}"></span>${k}</div>`).join("");
-    }
-    div.innerHTML = items + `<div class="li star"><span class="sw"></span>Astrid case (Italy)</div><div class="li"><span class="sw" style="background:#9aa3ad;opacity:.5"></span>Approximate location</div>`;
+    const mob = isMobile();
+    const div = L.DomUtil.create("div","legend" + (mob ? " collapsible" : "") + (mob && !legendOpen ? " collapsed" : ""));
+    L.DomEvent.disableClickPropagation(div);
+    const title = mob ? `Legend ${legendOpen?"▴":"▾"}` : (colourBy==="env" ? "Environmental impact" : "Category of use");
+    const items = colourBy==="env"
+      ? ["go","mid","no"].map(k=>`<div class="li"><span class="sw" style="background:${ENV_COLORS[k]}"></span>${ENV_NAME[k]}</div>`).join("")
+      : Object.keys(CAT_COLORS).filter(k=>k!=="Defence").map(k=>`<div class="li"><span class="sw" style="background:${CAT_COLORS[k]}"></span>${k}</div>`).join("");
+    div.innerHTML = `<div class="lt">${title}</div>` + items + `<div class="li star"><span class="sw"></span>Astrid case (Italy)</div><div class="li"><span class="sw" style="background:#9aa3ad;opacity:.5"></span>Approximate location</div>`;
+    if(mob) div.querySelector(".lt").onclick = ()=>{ legendOpen = !legendOpen; buildLegend(); };
     return div;
   };
   legendCtl.addTo(map);
@@ -382,14 +457,25 @@ function init(){
   let qT; els.q.addEventListener("input",()=>{ clearTimeout(qT); qT=setTimeout(apply,180); });
   F.forEach(k=>els[k].addEventListener("change",apply));
   els.colourBy.addEventListener("change",e=>{ colourBy=e.target.value; renderMap(); });
-  $("resetBtn").onclick = ()=>{ F.forEach(k=>els[k].value=""); els.q.value=""; colourBy="category"; els.colourBy.value="category"; sortKey=""; openId=null; apply(); map.setView([50,12],4); };
+  const resetAll = ()=>{ F.forEach(k=>els[k].value=""); els.q.value=""; colourBy="category"; els.colourBy.value="category"; sortKey=""; $("sortSel").value=""; openId=null; apply(); map.setView([50,12], isMobile()?3:4); };
+  $("resetBtn").onclick = resetAll; $("resetBtn2").onclick = resetAll;
   $("vMap").onclick = ()=>setView("map"); $("vList").onclick = ()=>setView("list");
-  $("csvBtn").onclick = downloadCSV;
+  $("csvBtn").onclick = downloadCSV; $("csvBtn2").onclick = downloadCSV;
   $("toggleFilters").onclick = ()=>$("panel").classList.toggle("open");
+  $("applyBtn").onclick = ()=>$("panel").classList.remove("open");
+  $("sheetX").onclick = closeSheet; map.on("click", closeSheet);
+  $("unlockBtn").onclick = ()=>setMapLock(false); $("lockBtn").onclick = ()=>setMapLock(true);
+  if(COARSE && IN_FRAME) setMapLock(true);
+  if(isMobile()) map.setView([50,12],3);
+  MQ.addEventListener && MQ.addEventListener("change",()=>{ closeSheet(); map.closePopup(); buildLegend(); setTimeout(()=>map.invalidateSize(),60); });
   $("infoBtn").onclick = ()=>$("modal").classList.add("open");
   $("closeModal").onclick = ()=>$("modal").classList.remove("open");
   $("modal").addEventListener("click",e=>{ if(e.target.id==="modal") e.target.classList.remove("open"); });
-  try{ if(window.self!==window.top && /^https?:/.test(location.href)){ const b=$("fullBtn"); b.href=location.href.split("#")[0]; b.style.display=""; } }catch(e){}
+  if(IN_FRAME && /^https?:/.test(location.href)){
+    const u = location.href.split("#")[0];
+    $("fullBtn").href = u; $("fullBtn").style.display = "";
+    $("fullBtn2").href = u; $("fullWrap2").style.display = "";
+  }
   apply();
   setView(location.hash==="#list" ? "list" : "map");
 }
