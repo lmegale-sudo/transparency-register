@@ -55,7 +55,8 @@
   .srcs a:hover{text-decoration:underline}
   .srcs .note{color:#8a929c;font-size:11px;margin-top:3px}
   .badge{font-size:10.5px;font-weight:700;border-radius:6px;padding:2px 7px;color:#fff;white-space:nowrap}
-  .badge.astrid{background:var(--astrid)} .badge.jrc{background:#15466e} .badge.new{background:#6b5bb5}
+  .badge.astrid{background:var(--astrid)} .badge.jrc{background:#15466e} .badge.new{background:#6b5bb5} .badge.aiw{background:#3f7fb5} .badge.dk{background:#a8323e} .badge.oecd{background:#2c8a8a}
+  .card .also{font-size:12px;color:#5b6675;margin-top:4px} .card .tr{font-size:11.5px;color:#8a929c;font-style:italic}
   .dataset{display:flex;align-items:center;gap:6px;margin-top:9px;font-size:11.5px;color:var(--muted)}
   .fix{font-size:11px;color:#8a929c;margin-top:6px} .fix a{color:#8a929c}
   .dot{display:block;width:13px;height:13px;border-radius:50%;border:1.5px solid rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(40,50,65,.25)}
@@ -218,13 +219,17 @@
     <button class="x" id="closeModal" aria-label="Close">×</button>
     <h2>About the Transparency Register</h2>
     <p>The Transparency Register is an interactive map of regulatory and public-sector practices that leverage Artificial Intelligence across the EU and beyond. Each practice is described by the <b>responsible authority</b>, a <b>short description</b>, the <b>type of technology</b>, the <b>level of government</b>, the <b>category of use</b>, and whether its <b>environmental impact</b> has been considered (and with which methodology). It can be browsed as a <b>map</b> or as a <b>list</b>, and the current selection can be downloaded as CSV. The initiative aims to enhance regulatory transparency, encourage best-practice sharing and foster innovation in AI-driven governance.</p>
-    <p style="margin-top:14px"><b>Where the cases come from — two datasets:</b></p>
+    <p style="margin-top:14px"><b>Where the cases come from — five datasets:</b></p>
     <ul>
       <li><span class="badge jrc">JRC</span> <b>JRC Public Sector Tech Watch (PSTW)</b> — the European Commission's observatory of AI and emerging technologies in the public sector (<a href="https://joinup.ec.europa.eu/collection/public-sector-tech-watch" target="_blank" rel="noopener">Joinup collection</a>). Provides the EU-wide breadth of the Register; source links are those recorded in the JRC dataset.</li>
       <li><span class="badge astrid">Astrid</span> <b>Astrid–SUSTAIN-AI-REG joint research</b> — G. Fantoni &amp; M. Rallo, “Intelligenza artificiale nel settore pubblico: il punto di vista delle amministrazioni italiane, tra sovranità digitale e sostenibilità ambientale”, <i>BioLaw Journal – Rivista di BioDiritto</i>, 2/2026, pp. 345–376, <a href="https://doi.org/10.15168/2284-4503-4218" target="_blank" rel="noopener">doi:10.15168/2284-4503-4218</a>. Provides the in-depth Italian cases, including the <b>environmental-impact methodologies</b>.</li>
+      <li><span class="badge aiw">AI Watch</span> <b>JRC AI Watch – Selected AI cases in the public sector</b> (2021, <a href="https://doi.org/10.2905/JRC.WXV5XY8" target="_blank" rel="noopener">JRC Data Catalogue</a>). Most of its cases are already in PSTW: those are not duplicated but marked “Also listed in”.</li>
+      <li><span class="badge dk">Offentlig AI</span> <b>Offentlig AI – Danish public-sector AI database</b> (University of Copenhagen, <a href="https://offentlig-ai.dk/projektdatabase" target="_blank" rel="noopener">offentlig-ai.dk</a>). Descriptions are translated from Danish; where recorded, the hosting / infrastructure of the solution is shown.</li>
+      <li><span class="badge oecd">OECD OPSI</span> <b>OECD Observatory of Public Sector Innovation – Case Study Library</b>, only the innovations tagged “Artificial Intelligence” (<a href="https://oecd-opsi.org/innovations/" target="_blank" rel="noopener">oecd-opsi.org</a>). The responsible organisation is derived from the case description.</li>
     </ul>
+    <p style="font-size:12.5px;color:#6b7480">Practices appearing in more than one dataset are shown once, under the first source, with the other sources listed as “Also listed in”.</p>
     <p style="margin-top:12px"><b>Location.</b> Practices are placed at the city of the responsible authority when it can be identified, otherwise at its region; national bodies are shown at the capital, EU-level bodies and multi-country projects at their seat or in Brussels. Cases whose location could only be determined at country level are shown at the capital with a lighter marker and flagged as “approximate”.</p>
-    <p style="font-size:12.5px;color:#6b7480">Methodological note: the JRC dataset does not record an environmental-impact assessment, so those cases are shown as <i>“Not documented”</i>. This is itself a finding — at present only a handful of authorities document the environmental footprint of their AI. The Register is updated regularly; corrections can be sent to <a href="mailto:sustainai@lumsa.it">sustainai@lumsa.it</a>.</p>
+    <p style="font-size:12.5px;color:#6b7480">Methodological note: the JRC, OECD and Danish datasets do not record an environmental-impact assessment, so those cases are shown as <i>“Not documented”</i>. This is itself a finding — at present only a handful of authorities document the environmental footprint of their AI. The Register is updated regularly; corrections can be sent to <a href="mailto:sustainai@lumsa.it">sustainai@lumsa.it</a>.</p>
   </div>
 </div>
 
@@ -236,8 +241,12 @@
 const CONTACT = "sustainai@lumsa.it";
 const REFS = {
   JRC:    {label:"JRC Public Sector Tech Watch", url:"https://joinup.ec.europa.eu/collection/public-sector-tech-watch"},
-  ASTRID: {label:"Fantoni & Rallo, BioLaw Journal 2/2026 — read the study", url:"https://doi.org/10.15168/2284-4503-4218"}
+  ASTRID: {label:"Fantoni & Rallo, BioLaw Journal 2/2026 — read the study", url:"https://doi.org/10.15168/2284-4503-4218"},
+  AIW:    {label:"JRC AI Watch – Selected AI cases in the public sector", url:"https://doi.org/10.2905/JRC.WXV5XY8"},
+  DK:     {label:"Offentlig AI – Danish public-sector AI database", url:"https://offentlig-ai.dk/projektdatabase"},
+  OECD:   {label:"OECD OPSI Case Study Library", url:"https://oecd-opsi.org/innovations/"}
 };
+const SRC_LABEL = {"JRC":"JRC Public Sector Tech Watch","Astrid":"Astrid–SUSTAIN-AI-REG (Italy)","AI Watch":"JRC AI Watch (2021)","Offentlig AI":"Offentlig AI (Denmark)","OECD OPSI":"OECD OPSI case library (AI)"};
 const GEO = {c:"City", r:"Region", n:"National body / national scope — shown at the capital", e:"EU-level body or multi-country project", a:"Approximate — only the country is known"};
 const GEO_SHORT = {c:"City", r:"Region", n:"National (capital)", e:"EU level", a:"Approximate (country)"};
 const CAT_COLORS = {"General public services":"#4e79a7","Economic affairs":"#f28e2b","Public order and safety":"#e15759","Health":"#76b7b2",
@@ -249,7 +258,8 @@ const ENV_NAME = {go:"Considered",mid:"Partly / aware",no:"Not documented"};
 function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function domain(u){ try{ return new URL(u).hostname.replace(/^www\./,""); }catch(e){ return u; } }
 function linksOf(d){ return (d.links && d.links.length) ? d.links : (d.link ? [d.link] : []); }
-function badgeClass(d){ return d.sourceShort==="Astrid" ? "astrid" : (d.sourceShort==="JRC" ? "jrc" : "new"); }
+const BADGE = {"Astrid":"astrid","JRC":"jrc","AI Watch":"aiw","Offentlig AI":"dk","OECD OPSI":"oecd"};
+function badgeClass(d){ return BADGE[d.sourceShort] || "new"; }
 
 let DATA = (window.REGISTER_DATA && window.REGISTER_DATA.length) ? window.REGISTER_DATA : null;
 let FILTERED = [], colourBy = "category", view = "map", sortKey = "", sortDir = 1, page = 0, openId = null;
@@ -282,12 +292,14 @@ function card(d){
   h += `</div>`;
   h += `<div class="loc">Location: <b>${esc(d.place||d.country)}</b>${d.place&&d.place.indexOf(d.country)<0?", "+esc(d.country):""} <span class="prec">· ${esc(GEO[d.geo]||"")}</span></div>`;
   if(d.desc) h += `<div class="desc">${esc(d.desc)}</div>`;
+  if(d.ref==="DK" && d.desc) h += `<div class="tr">Description translated from Danish.</div>`;
+  if(d.infra) h += `<div class="also">Hosting / infrastructure: <b>${esc(d.infra)}</b></div>`;
   h += `<div class="envbox ${eb}"><span class="lab">Environmental impact: ${esc(d.env)}</span>`;
   h += d.envMethod ? `<div class="m">${esc(d.envMethod)}</div>` : (eb==="no" ? `<div class="m" style="color:#8a929c">No environmental-impact methodology recorded for this case.</div>` : "");
   h += `</div>`;
   h += `<div class="srcs">`;
   if(L1.length){
-    h += `<div class="h">${d.sourceShort==="JRC" ? "Links recorded in the JRC dataset" : "Official / project links"}</div>`;
+    h += `<div class="h">${d.sourceShort==="Astrid" ? "Official / project links" : "Links recorded in the source dataset"}</div>`;
     h += L1.map(u=>`<div>↗ <a href="${esc(u)}" target="_blank" rel="noopener">${esc(domain(u))}</a></div>`).join("");
   }
   const ref = REFS[d.ref];
@@ -295,6 +307,7 @@ function card(d){
   if(!L1.length && !ref) h += `<div class="note">No source link available.</div>`;
   h += `</div>`;
   h += `<div class="dataset"><span class="badge ${badgeClass(d)}">${esc(d.sourceShort)}</span><span>${esc(d.source)}</span></div>`;
+  if(d.also && d.also.length) h += `<div class="also">Also listed in: ${d.also.map(esc).join("; ")}</div>`;
   const subj = encodeURIComponent(`Transparency Register – correction ${d.id}`);
   h += `<div class="fix">${esc(d.id)} · <a href="mailto:${CONTACT}?subject=${subj}">Report a correction</a></div>`;
   return h + `</div>`;
@@ -315,7 +328,7 @@ function matches(d,f,q){
   if(f.country && d.country!==f.country) return false;
   if(f.status && d.status!==f.status) return false;
   if(f.geo){ if(f.geo==="__precise"){ if(d.geo!=="c"&&d.geo!=="r") return false; } else if(d.geo!==f.geo) return false; }
-  if(q){ const hay=(d.name+" "+d.authority+" "+(d.keywords||"")+" "+(d.desc||"")+" "+d.techType+" "+(d.place||"")+" "+d.country+" "+d.id).toLowerCase(); if(hay.indexOf(q)<0) return false; }
+  if(q){ const hay=(d.name+" "+d.authority+" "+(d.keywords||"")+" "+(d.desc||"")+" "+(d.infra||"")+" "+d.techType+" "+(d.place||"")+" "+d.country+" "+d.id).toLowerCase(); if(hay.indexOf(q)<0) return false; }
   return true;
 }
 
@@ -437,12 +450,13 @@ function csvCell(v){ v = String(v==null?"":v); return /[",\n;]/.test(v) ? `"${v.
 function downloadCSV(){
   const cols = [["id","ID"],["name","Practice"],["authority","Responsible authority"],["country","Country"],["place","Place"],["geo","Location precision"],
     ["level","Level of government"],["category","Category of use (COFOG)"],["techType","Type of technology"],["status","Status"],["year","Start year"],
-    ["desc","Short description"],["env","Environmental impact"],["envMethod","Environmental-impact methodology"],["source","Source dataset"],["links","Links"],["ref","Reference"]];
+    ["desc","Short description"],["env","Environmental impact"],["envMethod","Environmental-impact methodology"],["infra","Hosting / infrastructure"],["source","Source dataset"],["also","Also listed in"],["links","Links"],["ref","Reference"]];
   const lines = [cols.map(c=>csvCell(c[1])).join(",")];
   for(const d of sorted()){
     lines.push(cols.map(([k])=>{
       if(k==="geo") return csvCell(GEO_SHORT[d.geo]||"");
       if(k==="links") return csvCell(linksOf(d).join(" | "));
+      if(k==="also") return csvCell((d.also||[]).join(" | "));
       if(k==="ref") return csvCell(REFS[d.ref] ? REFS[d.ref].url : "");
       return csvCell(d[k]);
     }).join(","));
@@ -461,7 +475,7 @@ function init(){
   fill(els.techType,uniq("techType"),"All technologies");
   els.env.innerHTML = `<option value="">All</option><option value="__considered">— Any environmental impact considered —</option>` + uniq("env").map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join("");
   const srcs = uniq("sourceShort");
-  els.source.innerHTML = `<option value="">All datasets</option>` + srcs.map(s=>`<option value="${esc(s)}">${s==="JRC"?"JRC Public Sector Tech Watch":(s==="Astrid"?"Astrid–SUSTAIN-AI-REG (Italy)":esc(s))}</option>`).join("");
+  els.source.innerHTML = `<option value="">All datasets</option>` + srcs.map(s=>`<option value="${esc(s)}">${esc(SRC_LABEL[s]||s)}</option>`).join("");
   fill(els.country,uniq("country"),"All countries");
   fill(els.status,uniq("status"),"All statuses");
   els.geo.innerHTML = `<option value="">All</option><option value="__precise">City or region only</option>` + ["c","r","n","e","a"].map(k=>`<option value="${k}">${GEO_SHORT[k]}</option>`).join("");
